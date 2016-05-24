@@ -1,0 +1,39 @@
+# Click-Through-Rate-Prediction
+In online advertising, click-through rate (CTR) is a very important metric for evaluating ad performance. As a result, click prediction systems are essential and widely used for sponsored search and real-time bidding.
+[more info](https://www.kaggle.com/c/avazu-ctr-prediction)
+
+# Feature Selection
+- label : 0/1 for non-click/click
+- id
+- hour =>  0600-1359:1, 1400-2159:2, 2200-0559:3
+- banner_pos
+- site_id
+- site_category
+- app_id
+- app_category
+- device_id
+- device_ip
+- device_model
+- device_type
+- C1, C14-C21 -- anonymized categorical variables
+
+# Dependencies
+- Spark 1.6.1
+- Scala 2.10.4
+- SBT 0.13.8
+
+# 說明
+總共有三種Model: SVM, Logistic Regression, Random Forest，兩種做法。
+
+#### Step 1 
+作法一：使用全部的Feature分別建立模型
+
+作法二：以亂度最高的feature先建一個model
+
+#### Step 2 建模
+Hyperparameter tunning:  return model which has the best AUC Area 
+
+#### Step 3 投票
+每個模型的建立過程會先做以投票方式產生Label。
+
+#### Step 4 計算投票的AUC Area
