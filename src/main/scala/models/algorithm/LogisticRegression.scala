@@ -9,6 +9,4 @@ import org.apache.spark.rdd.RDD
   */
 class LogisticRegression extends LinearModel{
   override def train(data: RDD[LabeledPoint]): GeneralizedLinearModel = ???
-
-  override def accurate(): Unit = ???
 }
