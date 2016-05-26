@@ -8,10 +8,11 @@ import org.apache.spark.rdd.RDD
   * Created by WeiChen on 2016/5/26.
   */
 
-abstract class LinearModel[D] extends Serializable{
-  def train(data: RDD[LabeledPoint],hyperParameters:D): GeneralizedLinearModel
+abstract class LinearModel() extends Serializable {
+  //  def train(data: RDD[LabeledPoint],hyperParameters:D): GeneralizedLinearModel
+  def hyperParameterTuning(data: RDD[LabeledPoint], test: RDD[LabeledPoint], iteration: List[Integer] = List(10, 100, 1000), threshold:List[Double]): ((Double, Double), GeneralizedLinearModel)
 
-  final def accurate(model: GeneralizedLinearModel, test: RDD[LabeledPoint]): (Double, Double) = {
+  final def accurate(model: GeneralizedLinearModel, test: RDD[LabeledPoint] ): (Double, Double) = {
     // Compute raw scores on the test set
     val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
       val prediction = model.predict(features)
