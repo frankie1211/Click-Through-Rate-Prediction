@@ -39,7 +39,7 @@ class Prepocess {
     var time = morn
 
     if(hour.equals("00")) {
-
+      time = night
     } else if (hour.equals("01")) {
       time = night
     } else if (hour.equals("02")) {
