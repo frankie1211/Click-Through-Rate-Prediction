@@ -8,7 +8,6 @@ import org.apache.spark.rdd.RDD
   * Created by WeiChen on 2016/5/26.
   */
 trait smallModel{
-
   def train()
 
   def accurate(model: GeneralizedLinearModel, test:RDD[LabeledPoint]): (Double, Double) ={
