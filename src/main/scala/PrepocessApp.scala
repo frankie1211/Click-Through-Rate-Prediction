@@ -11,7 +11,10 @@ import util.Prepocess
 object PrepocessApp {
 
   def main(args: Array[String]): Unit = {
+    println("Preprocess")
     val pre = new Prepocess()
     pre.prepoccessData(args(0), args(1))
+    println("End")
+
   }
 }
