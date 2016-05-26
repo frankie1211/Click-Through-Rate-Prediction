@@ -4,7 +4,7 @@ In online advertising, click-through rate (CTR) is a very important metric for e
 # Feature Selection
 - label : 0/1 for non-click/click
 - id
-- hour =>  0600-1359:1, 1400-2159:2, 2200-0559:3
+- hour =>  0600-13:1, 1400-21:2, 2200-05:3
 - banner_pos
 - site_id
 - site_category
