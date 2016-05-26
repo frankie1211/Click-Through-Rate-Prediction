@@ -49,7 +49,7 @@ abstract class LinearModel() extends Serializable {
     (auROC, auPRC)
   }
 
-  def findBestModel(modelMatrix: List[List[((Double,Double),GeneralizedLinearModel, (Int, Double))]]):((Double,Double),GeneralizedLinearModel)={
+  def findBestModel(modelMatrix: List[List[((Double,Double),GeneralizedLinearModel, (Int, Double))]]):(Double, Double, (Int, Double))={
     val transMatrix = modelMatrix.transpose
     val length = transMatrix(0).size
     val sumList = transMatrix.map(l => {
@@ -62,6 +62,7 @@ abstract class LinearModel() extends Serializable {
       })
       (sumAUC/length, sumPRC/length, l(0)._3)
     })
-
+    val best = sumList.maxBy((a)=> a._1)
+    best
   }
 }
