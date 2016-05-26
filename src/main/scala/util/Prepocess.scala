@@ -23,7 +23,7 @@ class Prepocess {
           " 16:" + splitLine(16) + " 17:" + splitLine(17) + " 18:" + splitLine(18) + " 19:" + splitLine(19) + " 20"  + splitLine(20) +
           " 21:" + splitLine(21)  + " 22:" + splitLine(22) + " 23:" + splitLine(23)
         )
-
+        writer.print("\n")
       }
     })
 
