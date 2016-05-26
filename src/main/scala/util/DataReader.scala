@@ -2,7 +2,7 @@ package util
 
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{Row, DataFrame}
 import org.apache.spark.sql.types._
 import org.apache.spark.ml.feature.RFormula
 
@@ -47,7 +47,19 @@ class DataReader(filePath: String) {
       .option("header", "true")
       .load(filePath)
 
-    new DataConverter(originData)
+    val convertHour = sqlContext.createDataFrame(originData.rdd.map(row => {
+      Row(
+        row.getString(0), row.getInt(1), UtilTool.hoursTransform2(row.getInt(2)),
+        row.getInt(3), row.getInt(4), row.getString(5), row.getString(6),
+        row.getString(7), row.getString(8), row.getString(9), row.getString(10),
+        row.getString(11), row.getString(12), row.getString(13), row.getInt(14),
+        row.getInt(15), row.getInt(16), row.getInt(17), row.getInt(18),
+        row.getInt(19), row.getInt(20), row.getInt(21), row.getInt(22),
+        row.getInt(23)
+      )
+    }), originData.schema)
+
+    new DataConverter(convertHour)
   }
 
   class DataConverter(originData: DataFrame) {
@@ -72,4 +84,13 @@ class DataReader(filePath: String) {
     }
   }
 
+}
+
+object UtilTool {
+  def hoursTransform2(hours: Int): Int = {
+    val hour = hours % 100
+    if (hour <= 5 || hour >= 22) 3
+    else if (hour >= 6 && hour <= 13) 1
+    else 2
+  }
 }
