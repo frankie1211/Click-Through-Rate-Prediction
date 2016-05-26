@@ -7,8 +7,9 @@ import org.apache.spark.rdd.RDD
 /**
   * Created by WeiChen on 2016/5/26.
   */
-abstract class LinearModel {
-  def train(data: RDD[LabeledPoint]): GeneralizedLinearModel
+
+abstract class LinearModel[D] extends Serializable{
+  def train(data: RDD[LabeledPoint],hyperParameters:D): GeneralizedLinearModel
 
   final def accurate(model: GeneralizedLinearModel, test: RDD[LabeledPoint]): (Double, Double) = {
     // Compute raw scores on the test set
