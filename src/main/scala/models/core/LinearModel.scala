@@ -10,7 +10,7 @@ import org.apache.spark.rdd.RDD
 
 abstract class LinearModel() extends Serializable {
   //  def train(data: RDD[LabeledPoint],hyperParameters:D): GeneralizedLinearModel
-  def hyperParameterTuning(data: RDD[LabeledPoint], test: RDD[LabeledPoint], iteration: List[Integer] = List(10, 100, 1000), threshold:List[Double]): ((Double, Double), GeneralizedLinearModel)
+  def hyperParameterTuning(data: RDD[LabeledPoint], test: RDD[LabeledPoint], iteration: List[Int] = List(10, 100, 1000), threshold:List[Double]): List[((Double, Double), GeneralizedLinearModel, (Int, Double))]
 
   final def accurate(model: GeneralizedLinearModel, test: RDD[LabeledPoint] ): (Double, Double) = {
     // Compute raw scores on the test set
@@ -47,5 +47,21 @@ abstract class LinearModel() extends Serializable {
     println("Area under ROC = " + auROC)
 
     (auROC, auPRC)
+  }
+
+  def findBestModel(modelMatrix: List[List[((Double,Double),GeneralizedLinearModel, (Int, Double))]]):((Double,Double),GeneralizedLinearModel)={
+    val transMatrix = modelMatrix.transpose
+    val length = transMatrix(0).size
+    val sumList = transMatrix.map(l => {
+      val length = l.size
+      var sumAUC = 0.0
+      var sumPRC = 0.0
+      l.foreach(e => {
+        sumAUC = sumAUC + e._1._1
+        sumPRC = sumPRC + e._1._2
+      })
+      (sumAUC/length, sumPRC/length, l(0)._3)
+    })
+
   }
 }
