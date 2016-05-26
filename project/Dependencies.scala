@@ -16,9 +16,9 @@ object Dependencies {
   import Library._
 
   val SparkLib = Seq(
-    sparkCore % "provided",
-    sparkSql % "provided",
-    sparkMlLib % "provided",
+    sparkCore,
+    sparkSql,
+    sparkMlLib,
     scalaTest % "test"
   )
 }

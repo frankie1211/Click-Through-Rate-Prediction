@@ -1,4 +1,4 @@
-package mllib
+package models.core
 
 import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
 import org.apache.spark.mllib.regression.{GeneralizedLinearModel, LabeledPoint}
@@ -7,10 +7,10 @@ import org.apache.spark.rdd.RDD
 /**
   * Created by WeiChen on 2016/5/26.
   */
-trait SmallModel{
-  def train()
+abstract class LinearModel extends SmallModel {
+  def train(data: RDD[LabeledPoint]): GeneralizedLinearModel
 
-  def accurate(model: GeneralizedLinearModel, test:RDD[LabeledPoint]): (Double, Double) ={
+  final def accurate(model: GeneralizedLinearModel, test: RDD[LabeledPoint]): (Double, Double) = {
     // Compute raw scores on the test set
     val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
       val prediction = model.predict(features)

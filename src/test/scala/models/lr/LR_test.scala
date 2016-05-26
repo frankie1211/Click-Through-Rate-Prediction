@@ -1,4 +1,4 @@
-package mllib.lr
+package models.lr
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.rdd.RDD
 import util.SparkTest;
