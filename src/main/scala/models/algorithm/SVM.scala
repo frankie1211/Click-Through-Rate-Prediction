@@ -13,10 +13,25 @@ class SVM extends LinearModel {
   override def hyperParameterTuning(data: RDD[LabeledPoint], test: RDD[LabeledPoint], iteration: List[Int], threshold: List[Double]): List[((Double, Double), GeneralizedLinearModel, (Int, Double))] = {
     val models = iteration.map(e => {
       val model = SVMWithSGD.train(data, e)
-      val min = 1.0
-      val max = 2.0
+      model.clearThreshold()
 
-      (min, max, model, e)
+      val scoreAndLabels = data.map { point =>
+        val score = model.predict(point.features)
+        (score, point.label)
+      }
+
+      val min = scoreAndLabels.min()(new Ordering[Tuple2[Double, Double]]() {
+        override def compare(x: (Double, Double), y: (Double, Double)): Int =
+          Ordering[Double].compare(x._1, y._1)
+      })
+
+      val max = scoreAndLabels.max()(new Ordering[Tuple2[Double, Double]]() {
+        override def compare(x: (Double, Double), y: (Double, Double)): Int =
+          Ordering[Double].compare(x._1, y._1)
+      })
+
+
+      (min._1, max._1, model, e)
     })
 
     val hyperList = models.map(e1 => {
