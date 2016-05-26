@@ -7,7 +7,7 @@ import org.apache.spark.rdd.RDD
 /**
   * Created by WeiChen on 2016/5/26.
   */
-abstract class LinearModel extends SmallModel {
+abstract class LinearModel {
   def train(data: RDD[LabeledPoint]): GeneralizedLinearModel
 
   final def accurate(model: GeneralizedLinearModel, test: RDD[LabeledPoint]): (Double, Double) = {
