@@ -7,6 +7,7 @@ scalaVersion := "2.10.5"
 assemblyJarName in assembly := "CTR.jar"
 
 libraryDependencies ++= Dependencies.SparkLib
+libraryDependencies += "com.databricks" % "spark-csv_2.10" % "1.4.0"
 
 baseAssemblySettings
 assemblyMergeStrategy in assembly := {
