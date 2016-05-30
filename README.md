@@ -25,9 +25,7 @@ In online advertising, click-through rate (CTR) is a very important metric for e
 總共有三種Model: SVM, Logistic Regression, Random Forest，兩種做法。
 
 #### Step 1 
-作法一：使用全部的Feature分別建立模型
-
-作法二：以亂度最高的feature先建一個model
+使用 spark 實作 Recursive Feature Elimination, 找出適當的屬性
 
 #### Step 2 建模
 Hyperparameter tunning:  return model which has the best AUC Area 
