@@ -1,8 +1,20 @@
 package models.algorithm
 
+<<<<<<< HEAD
+
+import models.core.TreeModel
+import org.apache.spark.mllib.regression.LabeledPoint
+
+=======
+
 import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
+
+>>>>>>> bbaac017afaf2b421e0d39907e0f36431b13aefa
+
 import org.apache.spark.mllib.tree.RandomForest
-import util.DataReader
+import org.apache.spark.mllib.tree.model.RandomForestModel
+import org.apache.spark.rdd.RDD
+import util.DataReader2
 
 /**
   * Created by benjamin658 on 2016/5/27.
@@ -10,11 +22,12 @@ import util.DataReader
 object RandomForestModel {
   def main(args: Array[String]) {
     val targetFeatures = List(
-      "banner_pos", "site_id", "site_category",
-      "app_domain", "C1", "C14", "C15", "C16", "C17", "C18", "C19", "C20", "C21"
+      "banner_pos", "site_id", "hour",
+      "C17", "C21", "C19", "C20", "C18", "C1"
     )
-    val data = new DataReader("/Users/benjamin658/workspace/develop/small.csv")
-      .readData()
+    // "C14", "C15", "C16", "C17", "C18", "C19", "C20","site_category","app_domain",
+    val data = new DataReader2().chain
+      .readFile("/Users/benjamin658/workspace/develop/mid.csv")
       .selectFeatures(targetFeatures)
       .getLabelPoint()
       .randomSplit(Array(0.8, 0.2))
@@ -36,9 +49,17 @@ object RandomForestModel {
 
     println("計算精準度.....")
     val labelAndPreds = testData.map { point =>
-      val score = dtModel.trees.map(tree => tree.predict(point.features)).filter(_>0).size.toDouble/dtModel.numTrees
+      val score = dtModel.trees.map(tree => tree.predict(point.features)).filter(_ > 0).size.toDouble / dtModel.numTrees
       (score, point.label)
     }
+
+
+    val testErr = labelAndPreds.filter(r => r._1 != r._2).count.toDouble / testData.count()
+    val accur = 1 - testErr
+
+    //    println("Train Length : " + trainData.collect().length)
+    //    println("Test Length : " + testData.collect().length)
+    println("精準度 = " + accur)
 
     val metrics = new BinaryClassificationMetrics(labelAndPreds)
     println("AUC Area : " + metrics.areaUnderROC())
