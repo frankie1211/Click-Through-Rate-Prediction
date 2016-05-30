@@ -17,7 +17,7 @@ object Main {
       "banner_pos", "site_id",  "site_category",
       "app_domain", "C1", "C14", "C15", "C16", "C17", "C18", "C19", "C20", "C21"
     )
-    val data = new DataReader("/Users/WanEnFu/Desktop/mid.csv")
+    val data = new DataReader("/Users/WanEnFu/Desktop/small.csv")
       .readData()
       .selectFeatures(targetFeatures)
       .getLabelPoint()
