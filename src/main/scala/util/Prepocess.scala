@@ -5,7 +5,7 @@ import java.io.{File, PrintWriter}
 /**
  * Created by WanEnFu on 16/5/26.
  */
-class Prepocess {
+class Prepocess extends Serializable{
 
   def prepoccessData(inputPath: String, outputPath: String): Unit = {
     val writer = new PrintWriter(new File(outputPath))

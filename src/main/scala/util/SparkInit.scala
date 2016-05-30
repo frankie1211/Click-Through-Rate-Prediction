@@ -14,6 +14,7 @@ object SparkInit {
     .setAppName(appName)
     .setMaster(master)
     .set("spark.io.compression.codec", "org.apache.spark.io.LZ4CompressionCodec")
+
   val sc = new SparkContext(conf)
   val sqlContext = new SQLContext(sc)
 

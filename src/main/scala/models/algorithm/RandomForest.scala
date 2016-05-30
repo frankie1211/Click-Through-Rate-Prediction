@@ -1,7 +1,16 @@
 package models.algorithm
 
+<<<<<<< HEAD
+
 import models.core.TreeModel
 import org.apache.spark.mllib.regression.LabeledPoint
+
+=======
+
+import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
+
+>>>>>>> bbaac017afaf2b421e0d39907e0f36431b13aefa
+
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
 import org.apache.spark.rdd.RDD
@@ -10,16 +19,6 @@ import util.DataReader2
 /**
   * Created by benjamin658 on 2016/5/27.
   */
-class Rdf extends TreeModel {
-  def train(data: RDD[LabeledPoint]): RandomForestModel = {
-
-  }
-
-  def accurate(model: RandomForestModel, test: RDD[LabeledPoint]): (Double, Double) = {
-
-  }
-}
-
 object RandomForestModel {
   def main(args: Array[String]) {
     val targetFeatures = List(
@@ -31,16 +30,16 @@ object RandomForestModel {
       .readFile("/Users/benjamin658/workspace/develop/mid.csv")
       .selectFeatures(targetFeatures)
       .getLabelPoint()
-      .randomSplit(Array(0.6, 0.4))
+      .randomSplit(Array(0.8, 0.2))
 
     val trainData = data(0)
     val testData = data(1)
 
     println("開始訓練模型.....")
-    val maxTreeDepth = 5
-    val maxBins = 32
+    val maxTreeDepth = 30
+    val maxBins = 100
     val numClasses = 2
-    val numTrees = 64
+    val numTrees = 256
     val categoricalFeaturesInfo = Map[Int, Int]()
     val impurity = "gini"
     val featureSubsetStrategy = "auto"
@@ -50,9 +49,10 @@ object RandomForestModel {
 
     println("計算精準度.....")
     val labelAndPreds = testData.map { point =>
-      val prediction = dtModel.predict(point.features)
-      (point.label, prediction)
+      val score = dtModel.trees.map(tree => tree.predict(point.features)).filter(_ > 0).size.toDouble / dtModel.numTrees
+      (score, point.label)
     }
+
 
     val testErr = labelAndPreds.filter(r => r._1 != r._2).count.toDouble / testData.count()
     val accur = 1 - testErr
@@ -60,5 +60,8 @@ object RandomForestModel {
     //    println("Train Length : " + trainData.collect().length)
     //    println("Test Length : " + testData.collect().length)
     println("精準度 = " + accur)
+
+    val metrics = new BinaryClassificationMetrics(labelAndPreds)
+    println("AUC Area : " + metrics.areaUnderROC())
   }
 }
