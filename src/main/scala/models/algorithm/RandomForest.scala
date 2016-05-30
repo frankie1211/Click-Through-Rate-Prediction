@@ -1,19 +1,34 @@
 package models.algorithm
 
+import models.core.TreeModel
+import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.tree.RandomForest
-import util.DataReader
+import org.apache.spark.mllib.tree.model.RandomForestModel
+import org.apache.spark.rdd.RDD
+import util.DataReader2
 
 /**
   * Created by benjamin658 on 2016/5/27.
   */
+class Rdf extends TreeModel {
+  def train(data: RDD[LabeledPoint]): RandomForestModel = {
+
+  }
+
+  def accurate(model: RandomForestModel, test: RDD[LabeledPoint]): (Double, Double) = {
+
+  }
+}
+
 object RandomForestModel {
   def main(args: Array[String]) {
     val targetFeatures = List(
-      "banner_pos", "site_id",  "site_category",
-      "app_domain", "C1", "C14", "C15", "C16", "C17", "C18", "C19", "C20", "C21"
+      "banner_pos", "site_id", "hour",
+      "C17", "C21", "C19", "C20", "C18", "C1"
     )
-    val data = new DataReader("/Users/benjamin658/workspace/develop/train.csv")
-      .readData()
+    // "C14", "C15", "C16", "C17", "C18", "C19", "C20","site_category","app_domain",
+    val data = new DataReader2().chain
+      .readFile("/Users/benjamin658/workspace/develop/mid.csv")
       .selectFeatures(targetFeatures)
       .getLabelPoint()
       .randomSplit(Array(0.6, 0.4))
@@ -42,8 +57,8 @@ object RandomForestModel {
     val testErr = labelAndPreds.filter(r => r._1 != r._2).count.toDouble / testData.count()
     val accur = 1 - testErr
 
-//    println("Train Length : " + trainData.collect().length)
-//    println("Test Length : " + testData.collect().length)
+    //    println("Train Length : " + trainData.collect().length)
+    //    println("Test Length : " + testData.collect().length)
     println("精準度 = " + accur)
   }
 }
