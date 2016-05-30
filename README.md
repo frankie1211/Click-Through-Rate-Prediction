@@ -22,7 +22,7 @@ In online advertising, click-through rate (CTR) is a very important metric for e
 - SBT 0.13.8
 
 # 說明
-總共有三種Model: SVM, Logistic Regression, Random Forest，兩種做法。
+總共有三種Model: SVM, Logistic Regression, Random Forest。
 
 #### Step 1 
 使用 spark 實作 Recursive Feature Elimination, 找出適當的屬性
