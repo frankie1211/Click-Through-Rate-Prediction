@@ -1,19 +1,7 @@
 package models.algorithm
 
-<<<<<<< HEAD
-
-import models.core.TreeModel
-import org.apache.spark.mllib.regression.LabeledPoint
-
-=======
-
 import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
-
->>>>>>> bbaac017afaf2b421e0d39907e0f36431b13aefa
-
 import org.apache.spark.mllib.tree.RandomForest
-import org.apache.spark.mllib.tree.model.RandomForestModel
-import org.apache.spark.rdd.RDD
 import util.DataReader2
 
 /**

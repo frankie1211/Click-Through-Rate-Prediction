@@ -1,8 +1,8 @@
 package models
 
 import models.algorithm.{SVM, LogisticRegression}
+import org.apache.log4j.{LogManager, Level}
 import org.apache.spark.mllib.classification.{SVMWithSGD, LogisticRegressionWithLBFGS}
-import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import util.DataReader

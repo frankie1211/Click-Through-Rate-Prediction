@@ -30,7 +30,7 @@ class DataReader2() {
     }
 
     def selectFeatures(targetFeatures: List[String]) = {
-      val featureFormula = "click ~ " + UtilTool.genFeatureFormula(targetFeatures)
+      val featureFormula = "click ~ " + UtilTools.genFeatureFormula(targetFeatures)
       val formula = new RFormula()
         .setFormula(featureFormula)
         .setFeaturesCol("features")
@@ -55,7 +55,7 @@ class DataReader2() {
     private def convertHours(dataFrame: DataFrame): DataFrame = {
       val convertHour = sqlContext.createDataFrame(dataFrame.rdd.map(row => {
         Row(
-          row.getString(0), row.getInt(1), UtilTool.hoursTransform(row.getInt(2)),
+          row.getString(0), row.getInt(1), UtilTools.hoursTransform(row.getInt(2)),
           row.getInt(3), row.getInt(4), row.getString(5), row.getString(6),
           row.getString(7), row.getString(8), row.getString(9), row.getString(10),
           row.getString(11), row.getString(12), row.getString(13), row.getInt(14),
