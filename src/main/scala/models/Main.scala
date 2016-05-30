@@ -3,10 +3,8 @@ package models
 import models.algorithm.{LogisticRegression, SVM}
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.mllib.classification.{LogisticRegressionWithLBFGS, SVMWithSGD}
-import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkConf, SparkContext}
 import util.DataReader
 
 /**
@@ -37,15 +35,15 @@ object Main {
     val splitData = getValidationData(trainData)
 
     //LR
-    //    val lr = new LogisticRegression
-    //    val lrModels = lr.hyperParameterTuning(splitData,List(0),List(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
-    //    val bestParameter = lr.findBestModel(lrModels)
-    //
-    //    val lrModel = new LogisticRegressionWithLBFGS().setNumClasses(2).run(trainData)
-    //    println("\nHyperparameter complete.\n----------------------")
-    //    println("Best threshold: " + bestParameter._4._2)
-    //    val lrResult = lrModel.clearThreshold().setThreshold(bestParameter._4._2)
-    //    lr.accurate(lrResult,testData)
+    val lr = new LogisticRegression
+    val lrModels = lr.hyperParameterTuning(splitData, List(0), List(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
+    val bestParameter = lr.findBestModel(lrModels)
+
+    val lrModel = new LogisticRegressionWithLBFGS().setNumClasses(2).run(trainData)
+    println("\nHyperparameter complete.\n----------------------")
+    println("Best threshold: " + bestParameter._4._2)
+    val lrResult = lrModel.clearThreshold().setThreshold(bestParameter._4._2)
+    lr.accurate(lrResult, testData)
 
     //SVM
     val svm = new SVM

@@ -2,7 +2,7 @@ package models.algorithm
 
 import models.core.LinearModel
 import org.apache.spark.mllib.classification.SVMWithSGD
-import org.apache.spark.mllib.regression.{GeneralizedLinearModel, LabeledPoint}
+import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 
 /**
