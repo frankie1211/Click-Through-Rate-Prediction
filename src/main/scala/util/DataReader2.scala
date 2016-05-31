@@ -17,7 +17,7 @@ class DataReader2() {
   val chain = new InnerDataReader(empDf)
 
   class InnerDataReader(dataFrame: DataFrame) {
-    val df = dataFrame.cache()
+    val df = dataFrame
 
     def readFile(filePath: String) = {
       val data = sqlContext.read

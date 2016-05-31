@@ -14,6 +14,8 @@ object SparkInit {
     .setAppName(appName)
     .setMaster(master)
     .set("spark.io.compression.codec", "org.apache.spark.io.LZ4CompressionCodec")
+    .set("spark.executor.memory", "8g")
+    .set("spark.driver.memory", "8g")
 
   val sc = new SparkContext(conf)
   val sqlContext = new SQLContext(sc)
