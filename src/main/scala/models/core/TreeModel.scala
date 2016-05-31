@@ -8,7 +8,9 @@ import org.apache.spark.rdd.RDD
   * Created by WeiChen on 2016/5/26.
   */
 abstract class TreeModel extends Serializable{
-  def train(data:RDD[LabeledPoint]): RandomForestModel
+  def train
 
-  def accurate(model:RandomForestModel,test:RDD[LabeledPoint]): (Double, Double)
+  def accurate
+
+  def hyperParameterTuning
 }
