@@ -11,14 +11,22 @@ import util.DataReader2
   * Created by benjamin658 on 2016/5/27.
   */
 class RandomForestAlgorithm(trainData: RDD[LabeledPoint], testData: RDD[LabeledPoint]) {
+  private val numClasses = 2
+  private val categoricalFeaturesInfo = Map[Int, Int]()
+  private val impurity = "gini"
+  private val featureSubsetStrategy = "auto"
 
-  private def accurate(dataSet: RDD[LabeledPoint], model: RandomForestModel): Double = {
+  def accurate(dataSet: RDD[LabeledPoint], model: RandomForestModel): (Double, Double, Double) = {
     val labelAndPreds = dataSet.map { point =>
       val score = model.trees.map(tree => tree.predict(point.features)).filter(_ > 0).size.toDouble / model.numTrees
       (score, point.label)
     }
+    val metrics = new BinaryClassificationMetrics(labelAndPreds)
+    val auROC = metrics.areaUnderROC
+    val auPRC = metrics.areaUnderPR
+    val correctNum = labelAndPreds.filter(pair => pair._1 != pair._2).count()
 
-    new BinaryClassificationMetrics(labelAndPreds).areaUnderROC()
+    (auROC, auPRC, correctNum.toDouble)
   }
 
   private def getCrossValidationData(): List[(RDD[LabeledPoint], RDD[LabeledPoint])] = {
@@ -31,34 +39,50 @@ class RandomForestAlgorithm(trainData: RDD[LabeledPoint], testData: RDD[LabeledP
   }
 
   private def train(dataSet: RDD[LabeledPoint], maxTreeDepth: Int, maxBins: Int, numTrees: Int): RandomForestModel = {
-    val numClasses = 2
-    val categoricalFeaturesInfo = Map[Int, Int]()
-    val impurity = "gini"
-    val featureSubsetStrategy = "auto"
-
-    RandomForest.trainClassifier(dataSet, numClasses, categoricalFeaturesInfo, numTrees, featureSubsetStrategy, impurity, maxTreeDepth, maxBins)
+    RandomForest.trainClassifier(
+      dataSet,
+      numClasses,
+      categoricalFeaturesInfo,
+      numTrees,
+      featureSubsetStrategy,
+      impurity,
+      maxTreeDepth,
+      maxBins)
   }
 
-  def hyperParameterTuning(paramList: List[(Int, Int, Int)]): FinalModel = {
+  def hyperParameterTuning(paramList: List[(Int, Int, Int)]): BestModel = {
     val crossData = getCrossValidationData()
-    val modelList = paramList.map(params => {
-      val maxTreeDepth = params._1
-      val maxBins = params._2
-      val numTrees = params._3
-      crossData.map(data => {
+    val modelList: List[List[((Double, Double, Double), (Int, Int, Int))]] = crossData.map(data => {
+      paramList.map(params => {
+        val maxTreeDepth = params._1
+        val maxBins = params._2
+        val numTrees = params._3
         val model = train(data._1, maxTreeDepth, maxBins, numTrees)
-        val modelAccurate = accurate(data._2, model)
-        (model, modelAccurate)
-      })
-    }).flatten
 
-    new FinalModel(modelList)
+        (accurate(data._2, model), params)
+      })
+    }).transpose
+
+    val sumList: List[(Double, Double, Double, (Int, Int, Int))] = modelList.map(model => {
+      val length = model.size
+      val avgROC = (model.map(_._1._1).sum) / length
+      val avgPRC = (model.map(_._1._2).sum) / length
+      val sumCorrectNum = (model.map(_._1._3).sum)
+      (avgROC, avgPRC, sumCorrectNum, model(0)._2)
+    })
+
+    new BestModel(sumList.maxBy(_._3)._4)
   }
 
-  class FinalModel(modelList: List[(RandomForestModel, Double)]) {
-    def getBestModel(): (RandomForestModel, Double) = {
-      modelList.maxBy(_._2)
+  class BestModel(bestParamList: (Int, Int, Int)) {
+    def trainBestModel(dataSet: RDD[LabeledPoint]): RandomForestModel = {
+      val numTrees = bestParamList._1
+      val maxTreeDepth = bestParamList._2
+      val maxBins = bestParamList._3
+      train(dataSet, numTrees, maxTreeDepth, maxBins)
     }
+
+    def getBestParmList(): (Int, Int, Int) = bestParamList
   }
 
 }
@@ -71,7 +95,7 @@ object Demo {
     )
     println("#####################Start to load data########################")
     val data = new DataReader2().chain
-      .readFile("/Users/benjamin658/workspace/develop/mid.csv")
+      .readFile("/Users/benjamin658/workspace/develop/small.csv")
       .selectFeatures(targetFeatures)
       .getLabelPoint()
       .randomSplit(Array(0.8, 0.2))
@@ -80,8 +104,11 @@ object Demo {
 
     println("#####################Start to train model########################")
     val rdf = new RandomForestAlgorithm(trainData, testData)
-    val model = rdf.hyperParameterTuning(List((20, 200, 350))).getBestModel()
+    val bestModel = rdf.hyperParameterTuning(List((10, 10, 50), (20, 20, 100))).trainBestModel(trainData)
+    val accurate = rdf.accurate(testData, bestModel)
     println("#####################Train model finish########################")
-    println("AUC Area : " + model._2)
+    println("Model ROC = " + accurate._1)
+    println("Model PRC = " + accurate._2)
+    println("Model Correct Num = " + accurate._3)
   }
 }
