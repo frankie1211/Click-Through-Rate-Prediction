@@ -9,13 +9,14 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 object SparkInit {
   val appName = "CTR"
-  val master = "local[*]"
+  val master = "local[1]"
   val conf = new SparkConf()
     .setAppName(appName)
     .setMaster(master)
-    .set("spark.io.compression.codec", "org.apache.spark.io.LZ4CompressionCodec")
     .set("spark.executor.memory", "8g")
     .set("spark.driver.memory", "8g")
+    .set("spark.driver.extraJavaOptions", "-XX:MaxPermSize=8192")
+    .set("spark.driver.extraJavaOptions", "-XX:PermSize=4096")
 
   val sc = new SparkContext(conf)
   val sqlContext = new SQLContext(sc)
