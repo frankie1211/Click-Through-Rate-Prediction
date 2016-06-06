@@ -1,11 +1,14 @@
 package models
 
-import models.algorithm.{SVM, LogisticRegression}
-import org.apache.log4j.{LogManager, Level}
+import models.algorithm.{RandomForestAlgorithm, SVM, LogisticRegression}
+import org.apache.log4j.LogManager
+import org.apache.log4j.Level
 import org.apache.spark.mllib.classification.{SVMWithSGD, LogisticRegressionWithLBFGS}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import util.DataReader
+import util.DataReader2
+import vote.ModelVote
+
 
 /**
   * Created by WeiChen on 2016/5/26.
@@ -21,30 +24,31 @@ object Main {
 
   def main(args: Array[String]) {
     val targetFeatures = List(
-      "site_id", "banner_pos", "C1", "hour", "C21"
+      "banner_pos", "site_id", "hour",
+      "C17", "C21", "C19", "C20", "C18", "C1"
     )
-    val Array(trainData, testData) = new DataReader("/Users/WeiChen/Downloads/mid.csv")
-      .readData()
+
+    println("#####################Start to load data########################")
+    val Array(trainData, testData) = new DataReader2().chain
+      .readFile("/Users/benjamin658/workspace/develop/mid.csv")
       .selectFeatures(targetFeatures)
       .getLabelPoint()
       .randomSplit(Array(0.8, 0.2))
 
-    LogManager.getRootLogger.setLevel(Level.ERROR)
-    println("開始訓練模型.....")
     val splitData = getValidationData(trainData)
+    LogManager.getRootLogger.setLevel(Level.ERROR)
 
-    //LR
+    println("##################### Start to train model ########################")
+
+    println("##################### First Model : Logistic Regression ########################")
     val lr = new LogisticRegression
     val lrModels = lr.hyperParameterTuning(splitData, List(0), List(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
     val bestParameter = lr.findBestModel(lrModels)
-
     val lrModel = new LogisticRegressionWithLBFGS().setNumClasses(2).run(trainData)
-    println("\nHyperparameter complete.\n----------------------")
-    println("Best threshold: " + bestParameter._4._2)
-    val lrResult = lrModel.clearThreshold().setThreshold(bestParameter._4._2)
-    lr.accurate(lrResult, testData)
+    val bestLRModel = lrModel.clearThreshold().setThreshold(bestParameter._4._2)
+    println("##################### First Model Done ########################")
 
-    //SVM
+    println("##################### Second Model : SVM ########################")
     val svm = new SVM
     val svmModels = svm.hyperParameterTuning(splitData, List(10, 20), List(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0))
     val bestPar = svm.findBestModel(svmModels)
@@ -66,8 +70,22 @@ object Main {
         Ordering[Double].compare(x._1, y._1)
     })
 
-    val svmResult = svmModel.clearThreshold().setThreshold(min._1 + (max._1 - min._1) * bestPar._4._2)
-    svm.accurate(svmResult, testData)
-    println("Threshold: " + bestPar._4._2)
+    val bestSVMModel = svmModel.clearThreshold().setThreshold(min._1 + (max._1 - min._1) * bestPar._4._2)
+    println("##################### Second Model Done ########################")
+
+    println("##################### Third Model : Random Forest ########################")
+    val rdf = new RandomForestAlgorithm(trainData, testData)
+    val bestRandomForestModel = rdf.hyperParameterTuning(List((10, 20, 50), (20, 30, 100))).trainBestModel(trainData)
+    println("##################### Third Model Done ########################")
+
+    println("##################### Start to vote ########################")
+    val modelVote = new ModelVote(bestLRModel, bestSVMModel, bestRandomForestModel)
+    val voteResult = modelVote.vote(testData)
+    val voteAccurate = modelVote.accurate(voteResult)
+
+    println("##################### Vote Result ########################")
+    println("Model ROC = " + voteAccurate._1)
+    println("Model PRC = " + voteAccurate._2)
+    println("Model Correct Num = " + voteAccurate._3)
   }
 }
