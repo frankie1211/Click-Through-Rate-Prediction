@@ -14,8 +14,15 @@ class ModelVote(lrModel: LogisticRegressionModel, svmModel: SVMModel, rdfModel: 
     val labelAndPreds = dataSet.map(point => {
       val lrPredict = lrModel.predict(point.features)
       val svmPredict = svmModel.predict(point.features)
-      val rdfPredict = rdfModel.trees.map(tree => tree.predict(point.features)).filter(_ > 0).size.toDouble / rdfModel.numTrees
+      val rdfPredict = rdfModel.predict(point.features)
       val finalPredict = if (lrPredict + svmPredict + rdfPredict < 2) 0 else 1
+      val isCorrect = (finalPredict == point.label).toString
+
+      println("SVM say : " + lrPredict)
+      println("LR say : " + lrPredict)
+      println("Random Forest say : " + rdfPredict)
+      println("Voting result is " + finalPredict)
+      println("Correct or not : " + isCorrect)
 
       (finalPredict.toDouble, point.label)
     })
