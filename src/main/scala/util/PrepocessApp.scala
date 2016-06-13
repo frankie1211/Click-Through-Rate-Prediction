@@ -13,7 +13,7 @@ object PrepocessApp {
   def main(args: Array[String]): Unit = {
     println("Preprocess")
     val pre = new Prepocess()
-    pre.prepoccessData(args(0), args(1))
+    pre.prepocessData("/Users/WanEnFu/Desktop/small.csv", "/Users/WanEnFu/Desktop/testPre.csv")
     println("End")
 
   }
