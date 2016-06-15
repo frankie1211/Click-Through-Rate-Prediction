@@ -5,7 +5,6 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
 import org.apache.spark.rdd.RDD
-import util.DataReader2
 
 /**
   * Created by benjamin658 on 2016/5/27.
@@ -76,39 +75,13 @@ class RandomForestAlgorithm(trainData: RDD[LabeledPoint], testData: RDD[LabeledP
 
   class BestModel(bestParamList: (Int, Int, Int)) {
     def trainBestModel(dataSet: RDD[LabeledPoint]): RandomForestModel = {
-      val numTrees = bestParamList._1
-      val maxTreeDepth = bestParamList._2
-      val maxBins = bestParamList._3
-      train(dataSet, numTrees, maxTreeDepth, maxBins)
+      val maxTreeDepth = bestParamList._1
+      val maxBins = bestParamList._2
+      val numTrees = bestParamList._3
+      train(dataSet, maxTreeDepth, maxBins, numTrees)
     }
 
     def getBestParmList(): (Int, Int, Int) = bestParamList
   }
 
-}
-
-object Demo {
-  def main(args: Array[String]) {
-    val targetFeatures = List(
-      "banner_pos", "site_id", "hour",
-      "C17", "C21", "C19", "C20", "C18", "C1"
-    )
-    println("#####################Start to load data########################")
-    val data = new DataReader2().chain
-      .readFile("/Users/benjamin658/workspace/develop/small.csv")
-      .selectFeatures(targetFeatures)
-      .getLabelPoint()
-      .randomSplit(Array(0.8, 0.2))
-    val trainData = data(0)
-    val testData = data(1)
-
-    println("#####################Start to train model########################")
-    val rdf = new RandomForestAlgorithm(trainData, testData)
-    val bestModel = rdf.hyperParameterTuning(List((10, 10, 50), (20, 20, 100))).trainBestModel(trainData)
-    val accurate = rdf.accurate(testData, bestModel)
-    println("#####################Train model finish########################")
-    println("Model ROC = " + accurate._1)
-    println("Model PRC = " + accurate._2)
-    println("Model Correct Num = " + accurate._3)
-  }
 }
