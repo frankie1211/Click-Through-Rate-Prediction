@@ -1,6 +1,6 @@
 package vote
 
-import org.apache.spark.mllib.classification.{LogisticRegressionModel, SVMModel}
+import org.apache.spark.mllib.classification.{NaiveBayesModel, LogisticRegressionModel, SVMModel}
 import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.tree.model.RandomForestModel
@@ -9,22 +9,16 @@ import org.apache.spark.rdd.RDD
 /**
   * Created by benjamin658 on 2016/6/6.
   */
-class ModelVote(lrModel: LogisticRegressionModel, svmModel: SVMModel, rdfModel: RandomForestModel) extends Serializable {
+class ModelVote(lrModel: LogisticRegressionModel, svmModel: SVMModel, nabyModel: NaiveBayesModel) extends Serializable {
   def vote(dataSet: RDD[LabeledPoint]) = {
     val labelAndPreds = dataSet.map(point => {
       val lrPredict = lrModel.predict(point.features)
       val svmPredict = svmModel.predict(point.features)
-      val rdfPredict = rdfModel.predict(point.features)
-      val finalPredict = if (lrPredict + svmPredict + rdfPredict < 2) 0 else 1
+      val nabyPredict = nabyModel.predict(point.features)
+      val finalPredict = if (lrPredict + svmPredict + nabyPredict < 2) 0 else 1
       val isCorrect = (finalPredict == point.label).toString
 
-      println("SVM say : " + lrPredict)
-      println("LR say : " + lrPredict)
-      println("Random Forest say : " + rdfPredict)
-      println("Voting result is " + finalPredict)
-      println("Correct or not : " + isCorrect)
-
-      (finalPredict.toDouble, point.label, lrPredict, svmPredict, rdfPredict)
+      (finalPredict.toDouble, point.label, lrPredict, svmPredict, nabyPredict)
     })
 
     labelAndPreds
@@ -34,8 +28,8 @@ class ModelVote(lrModel: LogisticRegressionModel, svmModel: SVMModel, rdfModel: 
     val voteMatrix = labelAndPreds.map(e => (e._1, e._2))
     val lrMatrix = labelAndPreds.map(e => (e._3, e._2))
     val svmMatrix = labelAndPreds.map(e => (e._4, e._2))
-    val rdfMatrix = labelAndPreds.map(e => (e._5, e._2))
-    val modelMatrixList = List((voteMatrix, "vote"), (lrMatrix, "lr"), (svmMatrix, "svm"), (rdfMatrix, "rdf"))
+    val nabyMatrix = labelAndPreds.map(e => (e._5, e._2))
+    val modelMatrixList = List((voteMatrix, "vote"), (lrMatrix, "lr"), (svmMatrix, "svm"), (nabyMatrix, "naby"))
 
     val result = modelMatrixList.map(e => {
       val metrics = new BinaryClassificationMetrics(e._1)

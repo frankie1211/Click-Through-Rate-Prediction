@@ -9,7 +9,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 object SparkInit {
   val appName = "CTR"
-  val master = "local[1]"
+  val master = "local[*]"
   val conf = new SparkConf()
     .setAppName(appName)
     .setMaster(master)
