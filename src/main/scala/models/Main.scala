@@ -92,7 +92,7 @@ object Main {
 
       println("##################### Create Report ########################")
       val reporter = new Reporter("/reportVariableNum" + h.size + ".csv")
-      reporter.createReport(voteAccurate)
+      reporter.createReport(voteAccurate, bestParameter, bestPar)
       reporter.close
     })
 

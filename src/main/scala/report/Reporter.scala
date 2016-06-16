@@ -9,7 +9,7 @@ class Reporter(outputPath: String) {
 
   val writer = new PrintWriter(new File(outputPath))
 
-  def createReport(voteAccurate: List[(Double, Double, Double, (Int, Int, Int, Int), String)]): Unit = {
+  def createReport(voteAccurate: List[(Double, Double, Double, (Int, Int, Int, Int), String)], bestSVMParam: (Double, Double, Double, (Int, Double)), bestLRParam: (Double, Double, Double, (Int, Double))): Unit = {
 
     writer.println("Model,auROC,auPR,correctNum,tp,fp,tn,fn,accurate")
     voteAccurate.foreach(e => {
@@ -20,6 +20,10 @@ class Reporter(outputPath: String) {
       )
     })
 
+    writer.println("bestLRParam:" + bestLRParam)
+    writer.println("bestSVMParam:" + bestSVMParam)
+
+    //補上ＲＦ與ＮＢ
   }
 
   def close(): Unit = {
