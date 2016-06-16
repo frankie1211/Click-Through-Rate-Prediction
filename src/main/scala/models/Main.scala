@@ -7,6 +7,7 @@ import org.apache.log4j.Level
 import org.apache.spark.mllib.classification.{SVMWithSGD, LogisticRegressionWithLBFGS}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
+import report.Reporter
 import util.DataReader2
 import vote.ModelVote
 
@@ -25,7 +26,7 @@ object Main {
 
   def main(args: Array[String]) {
     val hyperParameters = new FeatureSelection().selectFeature(10, 100) // take hyperParameters
-    hyperParameters.map(h => {
+    hyperParameters.foreach(h => {
       val targetFeatures = h.map(e => e._2._1)
       println("#####################Start to load data########################")
       val Array(trainData, testData) = new DataReader2().chain
@@ -83,9 +84,16 @@ object Main {
       val voteAccurate = modelVote.accurate(voteResult)
 
       println("##################### Vote Result ########################")
-      println("Model ROC = " + voteAccurate._1)
-      println("Model PRC = " + voteAccurate._2)
-      println("Model Correct Num = " + voteAccurate._3)
+      voteAccurate.foreach(e => {
+        println("Model" + e._5 + "ROC = " + e._1)
+        println("Model" + e._5 + "PRC = " + e._2)
+        println("Model" + e._5 + "Correct Num = " + e._3)
+      })
+
+      println("##################### Create Report ########################")
+      val reporter = new Reporter("/reportVariableNum" + h.size + ".csv")
+      reporter.createReport(voteAccurate)
+      reporter.close
     })
 
   }
