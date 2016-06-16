@@ -40,7 +40,7 @@ abstract class LinearModel() extends Serializable {
     val auROC = metrics.areaUnderROC
 
     //correctNum = TP+TN
-    val correctNum = predictionAndLabels.filter(pair => pair._1 != pair._2).count()
+    val correctNum = predictionAndLabels.filter(pair => pair._1 == pair._2).count()
     (auROC, auPRC, correctNum.toDouble)
   }
 

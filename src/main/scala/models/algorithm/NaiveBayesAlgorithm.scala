@@ -18,7 +18,7 @@ class NaiveBayesAlgorithm(trainData: RDD[LabeledPoint], testData: RDD[LabeledPoi
     val metrics = new BinaryClassificationMetrics(labelAndPreds)
     val auROC = metrics.areaUnderROC
     val auPRC = metrics.areaUnderPR
-    val correctNum = labelAndPreds.filter(pair => pair._1 != pair._2).count()
+    val correctNum = labelAndPreds.filter(pair => pair._1 == pair._2).count()
 
     (auROC, auPRC, correctNum.toDouble)
   }
@@ -56,17 +56,17 @@ class NaiveBayesAlgorithm(trainData: RDD[LabeledPoint], testData: RDD[LabeledPoi
       (avgROC, avgPRC, sumCorrectNum, model(0)._2)
     })
 
-    new BestModel(sumList.maxBy(_._3)._4)
+    new BestModel(sumList.maxBy(_._3))
   }
 
-  class BestModel(bestParamList: (Double, String)) {
+  class BestModel(bestParamList: (Double, Double, Double, (Double, String))) {
     def trainBestModel(dataSet: RDD[LabeledPoint]): NaiveBayesModel = {
       val lambda = bestParamList._1
-      val modelType = bestParamList._2
+      val modelType = bestParamList._4._2
       train(dataSet, lambda, modelType)
     }
 
-    def getBestParmList(): (Double, String) = bestParamList
+    def getBestParmList(): (Double, Double, Double, (Double, String)) = bestParamList
   }
 
 }
