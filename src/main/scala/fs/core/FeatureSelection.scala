@@ -1,50 +1,50 @@
 package fs.core
 
 import fs.conf.Features
-import util.{DataReader, SparkInit}
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.rdd.RDD
+import util.{DataReader2, SparkInit}
+
+import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 /**
- * Created by WanEnFu on 16/5/30.
- */
-class FeatureSelection {
+  * Created by WanEnFu on 16/5/30.
+  */
+class FeatureSelection(loadedData: DataReader2#InnerDataReader ) {
 
   def selectFeature(rankNum: Int, iterationNum: Int): List[List[(Double, (String, Int))]] = {
-    println("// ========== Step.1 Spark Application ==========")
     val sc = SparkInit.getSparkContext()
-    // ==============================================
-
-    println("// ========== Step.2 Data RDD ==========")
     val featuresList = Features.featuresList
+    val svm = new SVM(iterationNum)
 
-    // 取得 feature 並做成 RDD
-    var data = new DataReader("/Users/WanEnFu/Desktop/small.csv")
-      .readData()
-      .selectFeatures(featuresList)
-      .getLabelPoint()
+    println("========== Repeat train SVM until rank satisfy ==========")
+    def trainFeatureListRecursive() = {
+      val resultListBuffer: ListBuffer[List[(Double, (String, Int))]] = scala.collection.mutable.ListBuffer.empty[List[(Double, (String, Int))]]
+      val data: RDD[LabeledPoint] = loadedData.selectFeatures(featuresList).getLabelPoint()
+      val existFeatures: Array[Int] = 0 +: Array.fill[Int](featuresList.size + 1)(1)
+      @tailrec
+      def train(
+        resultListBuffer: ListBuffer[List[(Double, (String, Int))]],
+        data: RDD[LabeledPoint],
+        existFeatures: Array[Int]
+      ): ListBuffer[List[(Double, (String, Int))]] = {
+        rankNum match {
+          case rankNum: Int if (rankNum > existFeatures.sum) => resultListBuffer
+          case rankNum: Int if (rankNum <= existFeatures.sum) => {
+            val model = svm.trainSVM(data)
+            val ranks = svm.rank(existFeatures, model.weights.toArray)
+            val featureListWithLabel = ("label" :: Features.featuresList).zip(existFeatures)
+            val featureFilter = featureListWithLabel.filter(e => e._2 == 1).map(e => e._1)
+            resultListBuffer.append(ranks._2)
+            train(resultListBuffer, loadedData.selectFeatures(featureFilter).getLabelPoint(), ranks._1)
+          }
+        }
+      }
 
-    println("// ========== Repeat train SVM until rank satisfy ==========")
-    var existFeatures = Array.fill[Int](featuresList.size+1)(1) // index:0 is label, then features.
-    existFeatures(0) = 0 // label set 0.
-    val resultListBuffer = scala.collection.mutable.ListBuffer.empty[List[(Double, (String, Int))]]
-
-    while(rankNum <= existFeatures.sum) {
-
-      println("// ========== Step.3 SVM ==========")
-      val svm = new SVM(iterationNum)
-      val model = svm.trainSVM(data)
-      val ranks = svm.rank(existFeatures, model.weights.toArray)
-      resultListBuffer.append(ranks._2)
-      existFeatures = ranks._1
-      // ==============================================
-
-      println("// ========== Step.4 Reget Data RDD ==========")
-      val featureListWithLabel = ("label"::Features.featuresList).zip(existFeatures)
-      val featureFilter = featureListWithLabel.filter(e => e._2 == 1).map(e => e._1)
-      data = new DataReader("/Users/WanEnFu/Desktop/small.csv").readData().selectFeatures(featureFilter).getLabelPoint()
-      // ==============================================
+      train(resultListBuffer, data, existFeatures)
     }
-    // ==============================================
 
-    resultListBuffer.toList
+    trainFeatureListRecursive.toList
   }
 }
