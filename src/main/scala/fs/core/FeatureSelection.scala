@@ -8,7 +8,7 @@ import util.{DataReader, SparkInit}
  */
 class FeatureSelection {
 
-  def selectFeature(rankNum: Int, iterationNum: Int): List[String] = {
+  def selectFeature(rankNum: Int, iterationNum: Int): List[List[(Double, (String, Int))]] = {
     println("// ========== Step.1 Spark Application ==========")
     val sc = SparkInit.getSparkContext()
     // ==============================================
@@ -25,14 +25,15 @@ class FeatureSelection {
     println("// ========== Repeat train SVM until rank satisfy ==========")
     var existFeatures = Array.fill[Int](featuresList.size+1)(1) // index:0 is label, then features.
     existFeatures(0) = 0 // label set 0.
-    var result = List[(Double, (String, Int))]()
+    val resultListBuffer = scala.collection.mutable.ListBuffer.empty[List[(Double, (String, Int))]]
+
     while(rankNum <= existFeatures.sum) {
 
       println("// ========== Step.3 SVM ==========")
       val svm = new SVM(iterationNum)
       val model = svm.trainSVM(data)
       val ranks = svm.rank(existFeatures, model.weights.toArray)
-      result = ranks._2
+      resultListBuffer.append(ranks._2)
       existFeatures = ranks._1
       // ==============================================
 
@@ -44,6 +45,6 @@ class FeatureSelection {
     }
     // ==============================================
 
-    result.map(e => e._2._1)
+    resultListBuffer.toList
   }
 }
