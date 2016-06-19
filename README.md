@@ -1,3 +1,5 @@
+[![GitHub issues](https://img.shields.io/github/issues/IoTers/Click-Through-Rate-Prediction.svg)](https://github.com/IoTers/Click-Through-Rate-Prediction/issues) [![Wercker](https://img.shields.io/wercker/ci/wercker/docs.svg?maxAge=2592000)]() [![GitHub forks](https://img.shields.io/github/forks/IoTers/Click-Through-Rate-Prediction.svg)](https://github.com/IoTers/Click-Through-Rate-Prediction/network)
+
 # Click-Through-Rate-Prediction
 In online advertising, click-through rate (CTR) is a very important metric for evaluating ad performance. As a result, click prediction systems are essential and widely used for sponsored search and real-time bidding.
 
